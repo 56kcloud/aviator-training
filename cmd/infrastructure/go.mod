@@ -1,6 +1,6 @@
 module infrastructure-cmd
 
-go 1.21.4
+go 1.23
 
 require github.com/pulumi/pulumi/sdk/v3 v3.108.1
 
