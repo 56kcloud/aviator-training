@@ -29,7 +29,7 @@ func main() {
 			return err
 		}
 
-		ctx.Export("API url", pulumi.Sprintf("https://%s.execute-api.%s.amazonaws.com/%s/", apiOut.Api.ID(), regionOut.Name, apiOut.ProdStageName))
+		ctx.Export("Reservation API url", pulumi.Sprintf("https://%s.execute-api.%s.amazonaws.com/%s/reservations", apiOut.Api.ID(), regionOut.Name, apiOut.ProdStageName))
 		return nil
 	})
 }
