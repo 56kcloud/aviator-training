@@ -1,6 +1,7 @@
 #!/bin/bash
 
 curl -fsSL https://get.pulumi.com | sh
+export PULUMI_CONFIG_PASSPHRASE=
 
 sudo yum remove golang -y
 
@@ -16,5 +17,7 @@ popd &> /dev/null
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=$HOME/GO
 export PATH=$PATH:$GOPATH/bin
+export PATH=$PATH:$GOPATH/bin
 
 go version
+
