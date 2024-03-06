@@ -13,6 +13,12 @@ In the AWS console search bar, type Cloud9 and select the corresponding service 
 - Click **Create**
 - Back in the list of environment open the **workshop** environment you just created.
 
+### Replace AWS credentials
+Cloud9 comes with its own managed credentials by default. However these do not have the necessary permissions for this workshop. So let's turn them off and replace them.
+
+1. In the top right corner, click the Cog (settings) button -> AWS Settings -> unselect *AWS managed temporary credentials*.
+2. In the terminal, Copy & Paste the credentials received via this lab environment.
+
 ### Clone this repository
 In your Cloud9 environment, open a terminal and run:
 ```
@@ -42,7 +48,6 @@ pulumi login s3://pulumi-state-xxxxx
 
 ## Deploy the app
 ```
-cd aviator-training
 sh deploy.sh -s organization/aviator/dev
 ```
 
@@ -51,3 +56,9 @@ You will be asked if you want to create the "dev" stack:
 If you would like to create this stack now, please press <ENTER>, otherwise press ^C: 
 ```
 Press enter.
+
+The first time you run this command, it will take around 2 minutes to install all the application dependencies.
+
+So now is a good time to explore what is in the codebase.
+
+
