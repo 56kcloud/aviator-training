@@ -1,6 +1,6 @@
 module infrastructure
 
-go 1.23
+go 1.20
 
 require (
 	github.com/pulumi/pulumi-aws/sdk/v5 v5.43.0
