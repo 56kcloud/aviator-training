@@ -10,8 +10,8 @@ type TableOutputs struct {
 	TableArn  pulumi.StringOutput
 }
 
-func ProvisionTable(ctx *pulumi.Context) (*TableOutputs, error) {
-	name := "station-table"
+func Provision(ctx *pulumi.Context) (*TableOutputs, error) {
+	name := "aviator-table"
 	table, err := dynamodb.NewTable(ctx, name, &dynamodb.TableArgs{
 		Name:     pulumi.String(name),
 		HashKey:  pulumi.String("PK"),

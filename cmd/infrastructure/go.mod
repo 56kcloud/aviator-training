@@ -1,10 +1,14 @@
 module infrastructure-cmd
 
-go 1.21
+go 1.21.4
 
-toolchain go1.21.4
+require github.com/pulumi/pulumi/sdk/v3 v3.108.1
 
-require github.com/pulumi/pulumi/sdk/v3 v3.102.0
+require (
+	github.com/google/uuid v1.3.0 // indirect
+	github.com/pulumi/pulumi-aws/sdk/v5 v5.43.0
+	infrastructure v0.0.0-00010101000000-000000000000
+)
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
@@ -88,3 +92,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/frand v1.4.2 // indirect
 )
+
+replace infrastructure => ../../lib/infrastructure

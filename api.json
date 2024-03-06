@@ -1,0 +1,534 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Aviator API",
+        "version": "1.0.0",
+        "description": "Create your flight club, add your members and start reserving your aircraft. The Aviator.Club REST API is your one-stop-shop to integrate with the platform.",
+        "x-logo": {
+            "url": "./img/aviator-logo.png"
+        }
+    },
+    "components": {
+        "responses": {
+            "Cors200": {
+                "description": "Default response for CORS method",
+                "content": {},
+                "headers": {
+                    "Access-Control-Allow-Origin": {
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "Access-Control-Allow-Methods": {
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "Access-Control-Allow-Headers": {
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "ULID": {
+                "type": "string",
+                "example": "01H64K6E1H92C83DXSK1A0SD0R",
+                "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            },
+            "Timestamp": {
+                "type": "string",
+                "example": "2023-04-05T14:30:00Z"
+            },
+            "ResponseULID": {
+                "type": "object",
+                "example": {
+                    "id": "01H64K6E1H92C83DXSK1A0SD0R"
+                },
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/ULID"
+                    }
+                }
+            },
+            "ResponseTimestamps": {
+                "type": "object",
+                "example": {
+                    "createdAt": "2023-04-05T14:30Z",
+                    "updatedAt": "2023-04-05T14:30Z"
+                },
+                "properties": {
+                    "createdAt": {
+                        "$ref": "#/components/schemas/Timestamp"
+                    },
+                    "updatedAt": {
+                        "$ref": "#/components/schemas/Timestamp"
+                    }
+                }
+            },
+            "StandardString": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+            },
+            "OptionalString": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 100
+            },
+            "ReservationProperties": {
+                "type": "object",
+                "required": [
+                    "aircraft",
+                    "reservationType",
+                    "startTime",
+                    "endTime"
+                ],
+                "example": {
+                    "aircraft": "HB-KFQ",
+                    "reservationType": "01H6MDACS8EYJVRAJF62Z2N1VP",
+                    "pilot": "01H5FFGN19SAB85C3D8B0K8ZHP",
+                    "startTime": "2023-04-05T14:30:00+02:00",
+                    "endTime": "2023-04-05T15:30:00+02:00",
+                    "remarks": "270 km navigation"
+                },
+                "properties": {
+                    "aircraft": {
+                        "type": "string"
+                    },
+                    "reservationType": {
+                        "$ref": "#/components/schemas/StandardString"
+                    },
+                    "pilot": {
+                        "$ref": "#/components/schemas/StandardString"
+                    },
+                    "instructor": {
+                        "$ref": "#/components/schemas/StandardString"
+                    },
+                    "startTime": {
+                        "$ref": "#/components/schemas/Timestamp"
+                    },
+                    "endTime": {
+                        "$ref": "#/components/schemas/Timestamp"
+                    },
+                    "remarks": {
+                        "$ref": "#/components/schemas/OptionalString"
+                    }
+                }
+            },
+            "ReservationResponseProperties": {
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ResponseULID"
+                    },
+                    {
+                        "$ref": "#/components/schemas/ReservationProperties"
+                    },
+                    {
+                        "$ref": "#/components/schemas/ResponseTimestamps"
+                    }
+                ]
+            },
+            "ReservationListResponseProperties": {
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ResponseULID"
+                    },
+                    {
+                        "$ref": "#/components/schemas/ReservationProperties"
+                    },
+                    {
+                        "$ref": "#/components/schemas/ResponseTimestamps"
+                    }
+                ]
+            }
+        },
+        "parameters": {
+            "reservationId": {
+                "name": "reservationId",
+                "in": "path",
+                "required": true,
+                "description": "ULID of the reservation",
+                "schema": {
+                    "$ref": "#/components/schemas/ULID"
+                }
+            }
+        }
+    },
+    "x-amazon-apigateway-request-validators": {
+        "body-only": {
+            "validateRequestBody": true,
+            "validateRequestParameters": false
+        }
+    },
+    "x-amazon-apigateway-gateway-responses": {
+        "BAD_REQUEST_BODY": {
+            "statusCode": 400,
+            "responseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
+            },
+            "responseTemplates": {
+                "application/json": "{\"message\": \"$context.error.validationErrorString\"\n}"
+            }
+        },
+        "MISSING_AUTHENTICATION_TOKEN": {
+            "statusCode": 403,
+            "responseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
+            },
+            "responseTemplates": {
+                "application/json": "{\n     \"message\": $context.error.messageString\n}"
+            }
+        },
+        "UNAUTHORIZED": {
+            "statusCode": 401,
+            "responseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
+            },
+            "responseTemplates": {
+                "application/json": "{\n     \"message\": $context.error.messageString\n}"
+            }
+        },
+        "AUTHORIZER_FAILURE": {
+            "statusCode": 500,
+            "responseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
+            },
+            "responseTemplates": {
+                "application/json": "{\n     \"message\": $context.error.messageString\n}"
+            }
+        }
+    },
+    "paths": {
+        "/reservations": {
+            "options": {
+                "summary": "CORS support",
+                "description": "CORS support",
+                "tags": [
+                    "CORS"
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/Cors200"
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "requestTemplates": {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "type": "mock",
+                    "responses": {
+                        "default": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
+                                "method.response.header.Access-Control-Allow-Methods": "'*'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "responseTemplates": {
+                                "application/json": "{}"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a reservation",
+                "description": "Create an reservation",
+                "tags": [
+                    "Reservations"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReservationProperties"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Reservation successfully created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReservationResponseProperties"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "uri": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:app/invocations",
+                    "httpMethod": "POST",
+                    "type": "aws_proxy",
+                    "credentials": "arn:aws:iam::${AWS::AccountId}:role/api-gateway-invoke-lambda-role"
+                },
+                "x-amazon-apigateway-request-validator": "body-only",
+                "security": [
+                    {
+                        "idtoken-authorizer": []
+                    }
+                ]
+            },
+            "get": {
+                "summary": "List reservations",
+                "description": "List reservations",
+                "tags": [
+                    "Reservations"
+                ],
+                "parameters": [
+                    {
+                        "name": "booker",
+                        "in": "query",
+                        "required": false,
+                        "description": "Booker ULID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "instructor",
+                        "in": "query",
+                        "required": false,
+                        "description": "Instructor ULID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "instructorPlus",
+                        "in": "query",
+                        "required": false,
+                        "description": "Instructor ULID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "aircraft",
+                        "in": "query",
+                        "required": false,
+                        "description": "Aircraft registration",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "reservationType",
+                        "in": "query",
+                        "required": false,
+                        "description": "Reservation type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "required": false,
+                        "description": "Start date",
+                        "example": "1704034824",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "required": false,
+                        "description": "End date",
+                        "example": "1704034824",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Query limit",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "nextToken",
+                        "in": "query",
+                        "required": false,
+                        "description": "Next page token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservations successfully listed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "nextToken": {
+                                            "type": "string",
+                                            "example": "eyJQSyI6IiIsIlNLIjoiIn0="
+                                        },
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ReservationListResponseProperties"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "uri": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:app/invocations",
+                    "httpMethod": "POST",
+                    "type": "aws_proxy",
+                    "credentials": "arn:aws:iam::${AWS::AccountId}:role/api-gateway-invoke-lambda-role"
+                },
+                "x-amazon-apigateway-request-validator": "body-only"
+            }
+        },
+        "/reservations/{reservationId}": {
+            "options": {
+                "summary": "CORS support",
+                "description": "CORS support",
+                "tags": [
+                    "CORS"
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/Cors200"
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "requestTemplates": {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "type": "mock",
+                    "responses": {
+                        "default": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
+                                "method.response.header.Access-Control-Allow-Methods": "'*'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "responseTemplates": {
+                                "application/json": "{}"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "summary": "Retrieve a reservation",
+                "description": "Retrieve a reservation",
+                "tags": [
+                    "Reservations"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/reservationId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservation successfully retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReservationResponseProperties"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "uri": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:app/invocations",
+                    "httpMethod": "POST",
+                    "type": "aws_proxy",
+                    "credentials": "arn:aws:iam::${AWS::AccountId}:role/api-gateway-invoke-lambda-role"
+                },
+                "x-amazon-apigateway-request-validator": "body-only"
+            },
+            "put": {
+                "summary": "Update a reservation",
+                "description": "Update a reservation",
+                "tags": [
+                    "Reservations"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/reservationId"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReservationProperties"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reservation successfully updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReservationResponseProperties"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "uri": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:app/invocations",
+                    "httpMethod": "POST",
+                    "type": "aws_proxy",
+                    "credentials": "arn:aws:iam::${AWS::AccountId}:role/api-gateway-invoke-lambda-role"
+                },
+                "x-amazon-apigateway-request-validator": "body-only"
+            },
+            "delete": {
+                "summary": "Delete a reservation",
+                "description": "Delete a reservation",
+                "tags": [
+                    "Reservations"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/reservationId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Reservation successfully deleted"
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "uri": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:app/invocations",
+                    "httpMethod": "POST",
+                    "type": "aws_proxy",
+                    "credentials": "arn:aws:iam::${AWS::AccountId}:role/api-gateway-invoke-lambda-role"
+                },
+                "x-amazon-apigateway-request-validator": "body-only"
+            }
+        }
+    }
+}
