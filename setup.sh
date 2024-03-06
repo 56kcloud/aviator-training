@@ -1,4 +1,7 @@
 #!/bin/bash
+
+curl -fsSL https://get.pulumi.com | sh
+
 sudo yum remove golang -y
 
 GO_URL="https://go.dev/dl"
