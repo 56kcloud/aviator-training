@@ -13,11 +13,20 @@ In the AWS console search bar, type Cloud9 and select the corresponding service 
 - Click **Create**
 - Back in the list of environment open the **workshop** environment you just created.
 
-### Replace AWS credentials
+  
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/cloud9-basic-env.png)
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/create-cloud9-env.png)
+
+### Replace default AWS credentials
 Cloud9 comes with its own managed credentials by default. However these do not have the necessary permissions for this workshop. So let's turn them off and replace them.
 
 1. In the top right corner, click the Cog (settings) button -> AWS Settings -> unselect *AWS managed temporary credentials*.
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/cloud9-aws-settings.png)
 2. In the terminal, Copy & Paste the credentials received via this lab environment.
+
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/access-cli-credentials.png)
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/cli-credentials.png)
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/paste-cli-credentials.png)
 
 ### Clone this repository
 In your Cloud9 environment, open a terminal and run:
