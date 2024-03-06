@@ -62,11 +62,12 @@ sh deploy.sh -s organization/aviator/dev
 
 You will be asked if you want to create the "dev" stack:
 ```
+The stack 'organization/aviator/dev' does not exist.
 If you would like to create this stack now, please press <ENTER>, otherwise press ^C: 
 ```
 Press enter.
 
-The first time you run this command, it will take around 2 minutes to install all the application dependencies.
+The first time you run this command, it will take **around 2 minutes** to install all the application dependencies.
 
 So now is a good time to explore what is in the codebase.
 
