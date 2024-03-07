@@ -33,7 +33,7 @@ func Provision(ctx *pulumi.Context, input Input) (*Output, error) {
 	if err != nil {
 		return nil, err
 	}
-	lambdaExecutionRole, err := lambdaExecutionRole(ctx)
+	lambdaExecutionRole, err := lambdaExecutionRole(ctx, input)
 	if err != nil {
 		return nil, err
 	}
