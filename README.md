@@ -2,6 +2,11 @@
 
 Welcome to Aviator Training, a small serverless AWS backend written in Go that allows pilots to reserve aircraft and developers to learn about serverless cloud architectures.
 
+## Prerequesite
+You are signed into an AWS Lab environment and have access to the following screen:
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/access.png)
+Use the button on the left to access your own AWS console environment.
+
 ## Setup
 
 ### Create a Cloud9 environment
