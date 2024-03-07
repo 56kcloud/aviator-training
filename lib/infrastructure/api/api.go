@@ -141,7 +141,10 @@ func lambdaExecutionRole(ctx *pulumi.Context, input Input) (*iam.Role, error) {
 							{
 								Effect: pulumi.StringRef("Allow"),
 								Actions: []string{
-									"dynamodb:*",
+									"dynamodb:GetItem",
+									"dynamodb:PutItem",
+									"dynamodb:DeleteItem",
+									"dynamodb:Query",
 								},
 								Resources: []string{
 									arn,
