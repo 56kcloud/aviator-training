@@ -1,6 +1,6 @@
 # Aviator Training
 
-Welcome to Aviator Training, a small serverless AWS backend written in Go that allows pilots to reserve aircraft and developers to learn about serverless cloud architectures.
+Welcome to Aviator Training, a small serverless AWS backend written in Go that allows pilots to reserve aircraft and developers to learn about serverless cloud architectures. Using Infrastructure as Code you will provision a database, a Lambda function with the business logic code and a REST API.
 
 ## Prerequesite
 You are signed into an AWS Lab environment and have access to the following screen:
