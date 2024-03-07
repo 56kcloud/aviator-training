@@ -82,14 +82,15 @@
                 "type": "object",
                 "required": [
                     "aircraft",
+                    "pilot",
                     "reservationType",
                     "startTime",
                     "endTime"
                 ],
                 "example": {
                     "aircraft": "HB-KFQ",
-                    "reservationType": "01H6MDACS8EYJVRAJF62Z2N1VP",
-                    "pilot": "01H5FFGN19SAB85C3D8B0K8ZHP",
+                    "reservationType": "Sightseeing",
+                    "pilot": "Jane Doe",
                     "startTime": "2023-04-05T14:30:00+02:00",
                     "endTime": "2023-04-05T15:30:00+02:00",
                     "remarks": "270 km navigation"
