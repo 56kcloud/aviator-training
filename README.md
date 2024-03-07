@@ -77,4 +77,16 @@ The output of the Pulumi command provides a **Reservation API url** that looks l
 ```
 {"nextToken":null,"results":[]}
 ```
-Great, the API returns a successfull response. It is empty because we have not created any reservations yet.
+Great, the API returns a successfull response. It is empty because we have not created any reservations yet. Let's change that now. To create a reservation run the following command, after replacing the [api-id] with yours:
+```
+curl --location 'https://[api-id].execute-api.eu-west-1.amazonaws.com/v1/reservations' \
+--header 'Content-Type: application/json' \
+--data '{
+    "aircraft": "HB-KFQ",
+    "reservationType": "Sightseeing",
+    "startTime": "2024-04-07T16:00:00Z",
+    "endTime": "2024-04-07T17:00:00Z",
+    "pilot": "Jane Doe",
+    "remarks": ""
+}'
+```
