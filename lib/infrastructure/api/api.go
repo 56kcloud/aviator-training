@@ -116,14 +116,13 @@ func sha1Hash(input string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func lambdaExecutionRole(ctx *pulumi.Context) (*iam.Role, error) {
+func lambdaExecutionRole(ctx *pulumi.Context, input Input) (*iam.Role, error) {
 	roleName := "lambda-execution-role"
 	role, err := iam.NewRole(ctx, roleName, &iam.RoleArgs{
 		Name: pulumi.String(roleName),
 		ManagedPolicyArns: pulumi.StringArray{
 			iam.ManagedPolicyCloudWatchLogsFullAccess,
 			iam.ManagedPolicyAWSXRayDaemonWriteAccess,
-			iam.ManagedPolicyAmazonDynamoDBFullAccess,
 		},
 		AssumeRolePolicy: pulumi.String(`{
             "Version": "2012-10-17",
@@ -133,6 +132,27 @@ func lambdaExecutionRole(ctx *pulumi.Context) (*iam.Role, error) {
                 "Principal": { "Service": "lambda.amazonaws.com" }
             }]
        }`),
+		InlinePolicies: iam.RoleInlinePolicyArray{
+			iam.RoleInlinePolicyArgs{
+				Name: pulumi.String("dynamodb-access-policy"),
+				Policy: input.DynamodbTableArn.ApplyT(func(arn string) string {
+					document, _ := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
+						Statements: []iam.GetPolicyDocumentStatement{
+							{
+								Effect: pulumi.StringRef("Allow"),
+								Actions: []string{
+									"dynamodb:*",
+								},
+								Resources: []string{
+									arn,
+								},
+							},
+						},
+					})
+					return document.Json
+				}).(pulumi.StringOutput),
+			},
+		},
 	})
 	return role, err
 }
