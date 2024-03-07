@@ -73,11 +73,11 @@ The first time you run this command, it will take **around 2 minutes** to instal
 Run the previous command again, you will see that Pulumi is stateful, it will not provision any new resources.
 
 ## Calling the API
-The output of the Pulumi command provides a **Reservation API url** that looks like *https://[some-id].execute-api.eu-west-1.amazonaws.com/v1/reservations*. Clikc that URL -> Open in preview. You should see the following JSON output: 
+The output of the Pulumi command provides a **Reservation API url** that looks like *https://[some-id].execute-api.eu-west-1.amazonaws.com/v1/reservations*. Click that URL -> Open. You should see the following JSON output in a tab: 
 ```
 {"nextToken":null,"results":[]}
 ```
-Great, the API returns a successfull response. It is empty because we have not created any reservations yet. Let's change that now. To create a reservation run the following command, after replacing the [api-id] with yours:
+Great, the API returns a successfull response. It is empty because we have not created any reservations yet. Let's change that now. To create a reservation by making an HTTP POST request against your API, run the following command after replacing the [api-id] with yours:
 ```
 curl --location 'https://[api-id].execute-api.eu-west-1.amazonaws.com/v1/reservations' \
 --header 'Content-Type: application/json' \
@@ -90,3 +90,5 @@ curl --location 'https://[api-id].execute-api.eu-west-1.amazonaws.com/v1/reserva
     "remarks": ""
 }'
 ```
+If you still have the tab from the previous step open, refresh it and you will see it now returns the reservation you just created.
+
