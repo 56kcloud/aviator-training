@@ -69,3 +69,12 @@ Press enter.
 
 The first time you run this command, it will take **around 2 minutes** to install all the application dependencies. When all said and done, you should see the following output:
 ![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/initial-pulumi-output.png)
+
+Run the previous command again, you will see that Pulumi is stateful, it will not provision any new resources.
+
+## Calling the API
+The output of the Pulumi command provides a **Reservation API url** that looks like *https://[some-id].execute-api.eu-west-1.amazonaws.com/v1/reservations*. Clikc that URL -> Open in preview. You should see the following JSON output: 
+```
+{"nextToken":null,"results":[]}
+```
+Great, the API returns a successfull response. It is empty because we have not created any reservations yet.
