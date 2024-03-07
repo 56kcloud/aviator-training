@@ -1,6 +1,6 @@
 # Aviator Training
 
-Welcome to Aviator Training, a small serverless AWS backend that allows pilots to reserve aircraft and developers to learn serverless.
+Welcome to Aviator Training, a small serverless AWS backend written in Go that allows pilots to reserve aircraft and developers to learn about serverless cloud architectures.
 
 ## Setup
 
@@ -92,3 +92,64 @@ curl --location 'https://[api-id].execute-api.eu-west-1.amazonaws.com/v1/reserva
 ```
 If you still have the tab from the previous step open, refresh it and you will see it now returns the reservation you just created.
 
+## Under the hood
+Now that we have deployed this app, let's take a look at what was deployed. This application uses three main AWS managed services:
+- API Gateway to create a REST API
+- A single Lambda function with our business logic
+- A DynamoDB table to store the reservations
+
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/architecture.png)
+
+Before diving into the code, let's visit these services in the AWS console.
+
+### API Gateway
+In the [API Gateway console](https://eu-west-1.console.aws.amazon.com/apigateway/main/apis?region=eu-west-1), you should see an `aviator-rest-api` in the list of APIs. If you open it you will find a number of of API routes. For example if you click the `/reservations - GET` resource, you will find that this API route is mapped to a Lambda function.
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/api-gateway.png)
+
+### Lambda
+In the [Lambda console](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions), there is a function called "app". Open it and you will find the configuration details of the function: 
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/lambda.png)
+
+### DynamoDB
+In the [DynamoDB console](https://eu-west-1.console.aws.amazon.com/dynamodbv2/home?region=eu-west-1#tables), there is a table called "aviator-table". Open it and you will find the configuration and monitoring details of the table: 
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/dynamodb-table.png)
+If you navigate on the left menu to "Explore items", you can see the items stored in your table:
+![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/dynamodb-explore.png)
+
+### How was this deployed
+If we now go back to the code, let's look what's inside:
+```
+├── api.json # OpenAPI JSON spec
+├── deploy.sh # Command used to compile the Go code and provision the resources
+├── cmd 
+│   ├── functions # AWS Lambda functions
+│   │   ├── app # Main "app" function
+│   └── infrastructure # Go command to start Pulumi
+├── lib
+│   └── aviator # Business logic Go package imported by the Lambda function
+│   ├── infrastructure # Pulumi resource provisioning code
+│   │   ├── api # Provision API Gateway and Lambda integration
+│   │   ├── database # Provision the DynamoDB table
+```
+
+To get an idea of what Infrastructure as Code looks like, open `lib/infrastructure/database/database.go`. In this file you'll see we are using the Pulumi AWS SDK to create a new DynamoDB table by simply providing configuration properties (table name, Hash key, Range key, etc...). The list of configuration properties are of course provided by the [Pulumi documentation](https://www.pulumi.com/registry/packages/aws/api-docs/dynamodb/table/), itself backed by the [official AWS documentation](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html).
+
+Ok, now let's look at a Lambda function. Open `cmd/functions/app/main.go`. At the  bottom of the file you'll find:
+```
+func main() {
+  lambda.Start(HandleRequest)
+}
+```
+
+This is the entry point, when this function executes on AWS, the Lambda service will execute our Go executable and the Lambda will pass the trigger event to the `HandleRequest` function located in the middle of the file. Notice the signature of the `HandleRequest` function:
+```
+func HandleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
+```
+It takes as second parameter an event of type `APIGatewayProxyRequest`. This event contains everything we need to know to handle the incoming API request: the API route, HTTP method (GET, POST, etc...), JSON payload, etc... Once we have this event the rest is our own business logic. In this same file at the top you'll see we import notable the DynamoDB AWS SDK (`github.com/aws/aws-sdk-go-v2/service/dynamodb`) and our own reservation package (`aviator/reservation`). The code for the latter you can find in `lib/aviator/reservation/reservation.go`. But staying within the Lambda code for now, within the `HandleRequest` function the code initializes the a Database and Reservation clients. Finally if the incoming request concerns reservations, it calls the `reservationCrud` function (code can be found in `cmd/functions/app/reservation.go`), which is just a "switch case" function that calls the correct reservation library method based on whether we want to create, retrieve, update or delete (CRUD) a reservation:
+```
+if strings.HasPrefix(path, "/reservations") {
+		reservationClient.SetLogger(logger)
+		return reservationCrud(ctx, request, path, stage, reservationClient, *errorClient)
+}
+```
+The response of `reservationCrud` is returned to the Lambda and is of type `APIGatewayProxyResponse` which API Gateway can return to the caller. 
