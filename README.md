@@ -145,11 +145,13 @@ This is the entry point, when this function executes on AWS, the Lambda service 
 ```
 func HandleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
 ```
-It takes as second parameter an event of type `APIGatewayProxyRequest`. This event contains everything we need to know to handle the incoming API request: the API route, HTTP method (GET, POST, etc...), JSON payload, etc... Once we have this event the rest is our own business logic. In this same file at the top you'll see we import notable the DynamoDB AWS SDK (`github.com/aws/aws-sdk-go-v2/service/dynamodb`) and our own reservation package (`aviator/reservation`). The code for the latter you can find in `lib/aviator/reservation/reservation.go`. But staying within the Lambda code for now, within the `HandleRequest` function the code initializes the a Database and Reservation clients. Finally if the incoming request concerns reservations, it calls the `reservationCrud` function (code can be found in `cmd/functions/app/reservation.go`), which is just a "switch case" function that calls the correct reservation library method based on whether we want to create, retrieve, update or delete (CRUD) a reservation:
+It takes as second parameter an event of type `APIGatewayProxyRequest`. This event contains everything we need to know to handle the incoming API request: the API route, HTTP method (GET, POST, etc...), JSON payload, etc... Once we have this event the rest is our own business logic.
+
+In this same file at the top you'll see we import notable the DynamoDB AWS SDK (`github.com/aws/aws-sdk-go-v2/service/dynamodb`) and our own reservation package (`aviator/reservation`). The code for the latter you can find in `lib/aviator/reservation/reservation.go`. But staying within the Lambda code for now, within the `HandleRequest` function the code initializes the a Database and Reservation clients. Finally if the incoming request concerns reservations, it calls the `reservationCrud` function (code can be found in `cmd/functions/app/reservation.go`), which is just a "switch case" function that calls the correct reservation library method based on whether we want to create, retrieve, update or delete (CRUD) a reservation:
 ```
 if strings.HasPrefix(path, "/reservations") {
-		reservationClient.SetLogger(logger)
-		return reservationCrud(ctx, request, path, stage, reservationClient, *errorClient)
+    reservationClient.SetLogger(logger)
+    return reservationCrud(ctx, request, path, stage, reservationClient, *errorClient)
 }
 ```
 The response of `reservationCrud` is returned to the Lambda and is of type `APIGatewayProxyResponse` which API Gateway can return to the caller. 
