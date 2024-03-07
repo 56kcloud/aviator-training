@@ -210,7 +210,7 @@ func lambdaExecutionRole(ctx *pulumi.Context, input Input) (*iam.Role, error) {
 	return role, err
 }
 ```
-This is the defination of an IAM (Identity and Access Management) role, a building block of AWS. In this case, Pulumi attaches this role to the Lambda function, without the code that runs within the Lambda has no access to other AWS services. In our case we see that the current role statement provides access to DynamoDB (the `dynamodb:GetItem`, etc... statements). Let's change this role and see what happens. Remove all actions except the `dynamodb:DeleteItem` and save the file (if you get a warning about code formatting, ignore it):
+This is the defination of an IAM (Identity and Access Management) role, a building block of AWS. In this case, Pulumi attaches this role to the Lambda function, without it the code that runs within the Lambda has no access to other AWS services. In our case we see that the current role statement provides access to DynamoDB (the `dynamodb:GetItem`, etc... statements). Let's change this role and see what happens. Remove all actions except the `dynamodb:DeleteItem` and save the file (if you get a warning about code formatting, ignore it):
 ```go
 func lambdaExecutionRole(ctx *pulumi.Context, input Input) (*iam.Role, error) {
 	roleName := "lambda-execution-role"
