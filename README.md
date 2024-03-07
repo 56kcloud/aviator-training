@@ -155,3 +155,128 @@ if strings.HasPrefix(path, "/reservations") {
 }
 ```
 The response of `reservationCrud` is returned to the Lambda and is of type `APIGatewayProxyResponse` which API Gateway can return to the caller. 
+
+Ok, but how was API Gateway configured with the reservation API? In the route of this project, you'll find an `api.json`. These contains an [OpenAPI](https://swagger.io/specification/) spec. OpenAPI is an open-source and widely used API specification format. API Gateway is able to consume this JSON file and automatically configure itself based on its contents. Backed to the Pulumi code this, as well as the Lambda function provisioning, is done in the the`lib/infrastructure/api/api.go` file.
+
+### Roles and permissions
+AWS works on a "by default no access is given" basis. This is valid also for the resources and code you deploy. By default your code has no access to other AWS services, access must be given. To demonstrate this let's break our app 🙂. Open `lib/infrastructure/api/api.go` and look for the function:
+```go
+func lambdaExecutionRole(ctx *pulumi.Context, input Input) (*iam.Role, error) {
+	roleName := "lambda-execution-role"
+	role, err := iam.NewRole(ctx, roleName, &iam.RoleArgs{
+		Name: pulumi.String(roleName),
+		ManagedPolicyArns: pulumi.StringArray{
+			iam.ManagedPolicyCloudWatchLogsFullAccess,
+			iam.ManagedPolicyAWSXRayDaemonWriteAccess,
+		},
+		AssumeRolePolicy: pulumi.String(`{
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+				"Action": "sts:AssumeRole",	
+                "Principal": { "Service": "lambda.amazonaws.com" }
+            }]
+       }`),
+		InlinePolicies: iam.RoleInlinePolicyArray{
+			iam.RoleInlinePolicyArgs{
+				Name: pulumi.String("dynamodb-access-policy"),
+				Policy: input.DynamodbTableArn.ApplyT(func(arn string) string {
+					document, _ := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
+						Statements: []iam.GetPolicyDocumentStatement{
+							{
+								Effect: pulumi.StringRef("Allow"),
+								Actions: []string{
+									"dynamodb:GetItem",
+									"dynamodb:PutItem",
+									"dynamodb:DeleteItem",
+									"dynamodb:Query",
+								},
+								Resources: []string{
+									arn,
+								},
+							},
+						},
+					})
+					return document.Json
+				}).(pulumi.StringOutput),
+			},
+		},
+	})
+	return role, err
+}
+```
+This is the defination of an IAM (Identity and Access Management) role, a building block of AWS. In this case, Pulumi attaches this role to the Lambda function, without the code that runs within the Lambda has no access to other AWS services. In our case we see that the current role statement provides access to DynamoDB (the `dynamodb:GetItem`, etc... statements). Let's change this role and see what happens. Remove all actions except the `dynamodb:DeleteItem` and save the file (if you get a warning about code formatting, ignore it):
+```go
+func lambdaExecutionRole(ctx *pulumi.Context, input Input) (*iam.Role, error) {
+	roleName := "lambda-execution-role"
+	role, err := iam.NewRole(ctx, roleName, &iam.RoleArgs{
+		Name: pulumi.String(roleName),
+		ManagedPolicyArns: pulumi.StringArray{
+			iam.ManagedPolicyCloudWatchLogsFullAccess,
+			iam.ManagedPolicyAWSXRayDaemonWriteAccess,
+		},
+		AssumeRolePolicy: pulumi.String(`{
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+				"Action": "sts:AssumeRole",	
+                "Principal": { "Service": "lambda.amazonaws.com" }
+            }]
+       }`),
+		InlinePolicies: iam.RoleInlinePolicyArray{
+			iam.RoleInlinePolicyArgs{
+				Name: pulumi.String("dynamodb-access-policy"),
+				Policy: input.DynamodbTableArn.ApplyT(func(arn string) string {
+					document, _ := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
+						Statements: []iam.GetPolicyDocumentStatement{
+							{
+								Effect: pulumi.StringRef("Allow"),
+								Actions: []string{
+									"dynamodb:DeleteItem",
+								},
+								Resources: []string{
+									arn,
+								},
+							},
+						},
+					})
+					return document.Json
+				}).(pulumi.StringOutput),
+			},
+		},
+	})
+	return role, err
+}
+```
+
+Run the deploy command:
+```
+sh deploy.sh -s organization/aviator/dev
+```
+
+The Pulumi output should show that it updated the `lambda-execution-role` resource.
+
+Let's call our API and see what happens (remember to replace the API ID):
+```
+curl https://xxxxxxx.execute-api.eu-west-1.amazonaws.com/v1/reservations
+```
+
+You should see that no reservations are returned. Instead the response is:
+```
+{"message":"Unauthorized"}
+```
+The Lambda function has no READ access to the database and can't fetch the data.
+
+You can put the original IAM role definition back, save, deploy and test again.
+
+### Destroying the app
+Resources created by Pulumi can also be deleted. Let's remove the entire app:
+```
+sh destroy.sh -s organization/aviator/dev
+```
+You will be asked to confirm, select `yes`.
+
+If you try to call the API again, it won't work! Everything is gone.
+
+## Conclusion
+This small workshop demonstrated how easy it is to get going on the AWS cloud with serverless architecture. The services used today were all managed by AWS. They can be provisioned and destroyed within seconds. There was no need to manage them, we only needed to configure them. This gives developers time to focus on the code and business logic instead. Furthermore everything we used today was request based, meaning we only pay for the requests we served. There were no servers running 24 / 7, if our app has traffic nothing is running.
