@@ -29,7 +29,7 @@ Cloud9 comes with its own managed credentials by default. However these do not h
 ![Alt](https://github.com/56kcloud/aviator-training/blob/doc/doc/img/paste-cli-credentials.png)
 
 ### Clone this repository
-In your Cloud9 environment, open a terminal and run:
+In your Cloud9 environment, run the following in the bottom terminal:
 ```
 git clone https://github.com/56kcloud/aviator-training.git
 cd aviator-training
